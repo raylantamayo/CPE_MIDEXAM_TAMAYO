@@ -1,0 +1,90 @@
+- name: Download the Influxdb Package in Ubuntu
+  shell: curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
+  when: ansible_distribution == "Ubuntu"
+
+- name: Update again Ubuntu to read the Influxdb Package in Ubuntu
+  apt:
+    upgrade: dist
+    update_cache: yes
+  changed_when: false
+  when: ansible_distribution == "Ubuntu"
+
+- name: Install Influxdb in Ubuntu
+  apt:
+    name: influxdb
+    state: present
+  when: ansible_distribution == "Ubuntu"
+
+- name: Download the Influxdb in CentOS
+  get_url:
+    url: https://repos.influxdata.com/rhel/8/x86_64/stable/influxdb-1.8.5.x86_64.rpm
+    dest: /tmp/influxdb-1.8.5.x86_64.rpm
+  when: ansible_distribution == "CentOS"
+
+- name: Install Influxdb in CentOS
+  dnf:
+    name: /tmp/influxdb2-2.4.0-linux-amd64.tar.gz
+    state: present
+  when: ansible_distribution == "CentOS"
+
+- name: Start Influxdb
+  service:
+    name: influxdb
+    state: restarted
+
+- name: Grafaana Package in Ubuntu
+  shell: wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add - | sudo add-apt-repository "deb https://packages.grafana.com/oss/deb stable main"
+  when: ansible_distribution == "Ubuntu"
+
+- name: Update again Ubuntu to read the Grafana Package
+  apt:
+    upgrade: dist
+    update_cache: yes
+  changed_when: false
+  when: ansible_distribution == "Ubuntu"
+
+- name: Install Grafana in Ubuntu
+  apt:
+    name: grafana
+    state: present
+  when: ansible_distribution == "Ubuntu"
+
+- name: Download the Grafana in CentOS
+  get_url:
+    url: https://dl.grafana.com/enterprise/release/grafana-enterprise-9.2.2-1.x86_64.rpm
+    dest: /tmp/grafana-enterprise-9.2.2-1.x86_64.rpm
+  when: ansible_distribution == "CentOS"
+
+- name: Install Grafana in CentOS
+  dnf:
+    name: /tmp/grafana-enterprise-9.2.2-1.x86_64.rpm
+    state: present
+  when: ansible_distribution == "CentOS"
+
+- name: Start Grafana
+  service:
+    name: grafana-server
+    state: restarted
+
+- name: Install Prometheus for Ubuntu
+  apt:
+   name:
+    - prometheus
+   state: latest
+  when: ansible_distribution == "Ubuntu"
+
+- name: Install Prometheus for CentOS
+  dnf:
+   name:
+    - epel-release
+    - snapd
+   state: latest
+  when: ansible_distribution == "CentOS"
+
+- name: Enabling snapd
+  command: systemctl enable --now snapd.socket
+  when: ansible_distribution == "CentOS"
+
+- name: Prometheus for CentOS
+  command: snap install prometheus --classic
+  when: ansible_distribution == "CentOS"
